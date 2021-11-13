@@ -4,8 +4,6 @@
 # for accessing google sheet
 # $ sudo pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 from __future__ import print_function
-from logging import exception
-from os import name
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -24,7 +22,7 @@ from selenium.common.exceptions import NoSuchElementException
 
 import time
 import datetime
-import requests  # http requests
+import sys
 import traceback
 import logging
 
@@ -172,6 +170,7 @@ def main():
             except NoSuchElementException:
                 print('reached last page of results')
                 driver.close()
+                sys. exit()
             time.sleep(4)
 
     except exceptions:
