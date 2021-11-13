@@ -34,7 +34,7 @@ import logging
 # # extract the zip to a directory for later use
 PATH = "/lib/chromedriver"  # this the chrome driver file is
 driver = webdriver.Chrome(PATH)
-driver.implicitly_wait(3)
+driver.implicitly_wait(4)
 
 # need to register on the google maps platform and create a project to get the API Key, this makes crawling easier
 key = config('GoogleMapAPIKey')
@@ -172,7 +172,7 @@ def main():
             except NoSuchElementException:
                 print('reached last page of results')
                 driver.close()
-            time.sleep(3)
+            time.sleep(4)
 
     except exceptions:
         logging.error(traceback.format_exc())

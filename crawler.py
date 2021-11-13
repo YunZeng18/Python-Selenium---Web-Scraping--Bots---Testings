@@ -25,8 +25,8 @@ import requests  # http requests
 # https://sites.google.com/chromium.org/driver/
 # # extract the zip to a directory for later use
 PATH = "/lib/chromedriver"  # this the chrome driver file is
-
 driver = webdriver.Chrome(PATH)
+driver.implicitly_wait(4)
 
 # need to register on the google maps platform and create a project to get the API Key, this makes crawling easier
 key = config('GoogleMapAPIKey')
@@ -36,6 +36,7 @@ location = "burnaby"
 
 
 def main():
+
     # for more query options such as radius and location:
     # https://developers.google.com/maps/documentation/places/web-service/search-text
     query = requests.get(
