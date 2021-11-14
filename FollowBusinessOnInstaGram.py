@@ -17,6 +17,9 @@ from decouple import config
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
+
+import datetime
+import sys
 import traceback
 import logging
 
@@ -25,10 +28,14 @@ import logging
 # https://sites.google.com/chromium.org/driver/
 # extract the zip to a directory for later use
 PATH = "/lib/chromedriver"
+driver = webdriver.Chrome(PATH)
+driver.implicitly_wait(2)
 
 # instagram login
-name = config("username")
-password = config("pass")
+name = config("InstagramUsername")
+password = config("InstagramPass")
+
+spreadsheetId = config("spreadsheetId")
 
 
 def main():
@@ -57,27 +64,28 @@ def main():
 
     service = build('sheets', 'v4', credentials=creds)
 
+    # get the business names in an array for search
     businessNames = service.spreadsheets().values().get(
-        spreadsheetId="1udPHPUowWRyS5tv4lu2TXGNkHYn56lV4QKdn2MNzamk", range="Sheet1!I2:I9").execute()
+        spreadsheetId=spreadsheetId, range="Burnaby!I2:I").execute()
     print(businessNames["values"])
 
-    driver = webdriver.Chrome(PATH)
-    driver.implicitly_wait(4)
-    driver.get("https://www.instagram.com/")
+    # starting point in the google sheet
+    rowNum = 2
+    updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
 
     try:
 
+        driver.get("https://www.instagram.com/")
         driver.find_element('name', 'username').send_keys(name)
         driver.find_element('name', 'password').send_keys(password)
         driver.find_element('xpath', "//*[contains(text(), 'Log In')]").click()
 
         for business in businessNames["values"]:
-
-            # remove spaces to improve search
+            row = []
+            # add @ to filter down results
             queryString = '@'+business[0]
-
             search = driver.find_element(
-                'xpath', "//input[@aria-label=\"Search Input\"]")
+                'xpath', "//input[contains(@*,'Search')]")
             search.clear()
             search.send_keys(queryString)
 
@@ -88,6 +96,15 @@ def main():
                 results.find_element('xpath',
                                      "//*[contains(text(), 'No results found.')]")  # this will raise exception if the results aren't empty
                 print(f'search query "{queryString}": no results')
+                row = ["N/A", "", "N/A"]
+
+                service.spreadsheets().values().update(
+                    spreadsheetId=spreadsheetId, range=updatedRange,
+                    valueInputOption="RAW", body={
+                        'values': [row]
+                    }).execute()
+                rowNum += 1
+                updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
 
             except NoSuchElementException:
 
@@ -98,15 +115,31 @@ def main():
                 if("explore" not in topResult):
                     print(f'search query "{queryString}": {topResult}')
                     driver.get(topResult)
+                    try:
+                        driver.find_element(
+                            'xpath', "//button[contains(text(),'Follow')]").click()
+                        date = datetime.datetime.now().strftime(  # Timestamp
+                            f"%Y-%m-%d")
+                        row = [date, '', topResult]
+                    except NoSuchElementException:
+                        row = ['N/A', '', 'N/A']
 
                 else:
                     print(f'search query "{queryString}": bad results')
+                    row = ["N/A", "", "N/A"]
+                service.spreadsheets().values().update(
+                    spreadsheetId=spreadsheetId, range=updatedRange,
+                    valueInputOption="RAW", body={
+                        'values': [row]
+                    }).execute()
+                rowNum += 1
+                updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
 
-        while True:
-            pass
+        print('end of queries')
+        driver.close()
+        sys. exit()
     except Exception:
         logging.error(traceback.format_exc())
-        driver.quit()
 
 
 if __name__ == '__main__':
