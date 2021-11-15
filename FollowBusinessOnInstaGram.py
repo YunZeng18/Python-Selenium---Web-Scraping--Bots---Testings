@@ -113,7 +113,7 @@ def main():
                     date = datetime.datetime.now().strftime(f"%Y-%m-%d")  # Timestamp
                     row = [date, '', pageURL]
                 except NoSuchElementException:
-                    row = ['N/A', '', 'pageURL']
+                    row = ['N/A', '', pageURL]
 
             except NoSuchElementException:
                 print(f'search query "{queryString}": no results')
