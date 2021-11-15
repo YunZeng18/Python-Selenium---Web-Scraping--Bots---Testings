@@ -45,13 +45,12 @@ first attempt to get results from google map. I thought it would be easier but g
 
 ## crawler2.py
 
-This script directly navigates through the google.com and crawl the results. Google scramble all the tag names and ID so it was hard initially to get the elements I want until I discover the proper use of xpath in selenium package.
-I also discover that you can test your xpath in the chrome dev element tag by using ctl + F this helps a lot.
+This script directly navigates through the google.com and crawl the results of restaurants in burnaby. You can change the query to by changing the variables businesstype and location. Google scramble all the tag names and ID so it was hard initially to get the elements until I discover the proper use of xpath in selenium package.
+I also discover that you can test your xpath in the chrome dev element tag by using ctl + F. This saves a lot of time.
 
 ## FollowBusinessOnInstaGram.py
 
-I struggle a lot with how to filter down the search result to the store or maybe there isn't one.
-I discover you can add @ symbol to effectively filter out location and hashtag results. However, I realize there isn't a reliable way to determine if the store page is the one you want because instagram doesn't support sophisticated search filters. So I default to look at the first one on the result list and it usually returns a good match most of the time.
+I struggle a lot with how to filter down the search result to the store page because the search engine isn't that good on instagram. I discover you can add @ symbol to effectively filter out location and hashtag results. However, I realize there isn't a reliable way to determine if the store page is the one you want because instagram doesn't support sophisticated search filters. So I default to look at the first one on the result list and it usually returns a good match most of the time.
 
 ## FollowBusinessOnFaceBook.py
 
