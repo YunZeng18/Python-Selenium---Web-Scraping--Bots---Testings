@@ -86,8 +86,9 @@ def main():
     body = {
         'values': headings
     }
-    spreadsheet = service.spreadsheets().values().append(spreadsheetId=spreadsheetId, range="A1",
-                                                         valueInputOption="RAW", body=body).execute()
+    spreadsheet = service.spreadsheets().values().append(spreadsheetId=spreadsheetId,
+                                                         range="A1",        valueInputOption="RAW", body=body).execute()
+
     updatedRange = spreadsheet['updates']['updatedRange']
     ###
 
