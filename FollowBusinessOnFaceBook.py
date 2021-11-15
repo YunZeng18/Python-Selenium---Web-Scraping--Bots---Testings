@@ -23,7 +23,6 @@ from selenium.webdriver.chrome.options import Options
 import numpy as np
 
 import datetime
-import time
 import sys
 import traceback
 import logging
@@ -84,9 +83,11 @@ def main():
 
     # get the business names in an array for search
     businessNames = np.array(service.spreadsheets().values().get(
-        spreadsheetId=spreadsheetId, range="Burnaby!I2:I").execute()["values"])
+        spreadsheetId=spreadsheetId,
+        range="Burnaby!I2:I").execute()["values"])
     streetAddress = np.array(service.spreadsheets().values().get(
-        spreadsheetId=spreadsheetId, range="Burnaby!J2:J").execute()["values"])
+        spreadsheetId=spreadsheetId,
+        range="Burnaby!J2:J").execute()["values"])
 
     # use numpy to combine two arrays into pairs in one array
     queries = np.column_stack((businessNames, streetAddress))
@@ -101,29 +102,43 @@ def main():
         driver.find_element('id', 'email').send_keys(name)
         driver.find_element('id', 'pass').send_keys(password)
         driver.find_element('name', 'login').click()
+
         for entry in queries:
             print(entry)
             row = []
+
             driver.get(f"https://www.facebook.com/search/places/?q={entry}")
+
             try:
                 facebookpage = driver.find_element(
-                    'xpath', "//*[contains(@aria-label, '1.')]").get_attribute("href")
+                    'xpath',
+                    "//*[contains(@aria-label, '1.')]"
+                ).get_attribute("href")
+                try:
+                    driver.find_element(
+                        'xpath',
+                        "//span[contains(text(),'Disagree')]"
+                    ).click()
+                except NoSuchElementException:
+                    pass
                 driver.find_element(
-                    'xpath', "//*[contains(@aria-label, 'Like')]").click()
-                date = datetime.datetime.now().strftime(  # Timestamp
-                    f"%Y-%m-%d")
+                    'xpath',
+                    "//*[contains(@aria-label, 'Like')]"
+                ).click()
+                date = datetime.datetime.now().strftime("%Y-%m-%d")
                 row = [date, '', facebookpage]
             except NoSuchElementException:
                 row = ['N/A', '', 'N/A']
+
             print(row)
             service.spreadsheets().values().update(
-                spreadsheetId=spreadsheetId, range=updatedRange,
-                valueInputOption="RAW", body={
-                    'values': [row]
-                }).execute()
+                spreadsheetId=spreadsheetId,
+                range=updatedRange,
+                valueInputOption="RAW",
+                body={'values': [row]}).execute()
             rowNum += 1
             updatedRange = f"Burnaby!F{rowNum}:H{rowNum}"
-            time.sleep(10)  # bypass the facebook limit
+
         sys.exit()
     except Exception:
         logging.error(traceback.format_exc())
