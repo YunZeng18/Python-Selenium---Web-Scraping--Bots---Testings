@@ -1,7 +1,4 @@
-# install python on Linux(I am using Ubuntu)
-# $ sudo apt install python3-pip
-
-# for accessing google sheet
+# accessing google sheet https://developers.google.com/sheets/api/quickstart/python
 # $ sudo pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 from __future__ import print_function
 from google.oauth2.credentials import Credentials
@@ -10,15 +7,15 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import os.path
 
+# $ sudo pip3 install selenium
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.common import exceptions
+from selenium.common.exceptions import NoSuchElementException
+
 # access local development environment variables from .env file
 # $ sudo pip3 install python-decouple
 from decouple import config
-
-# install selenium package
-# $ sudo pip3 install selenium
-from selenium import webdriver
-from selenium.common import exceptions
-from selenium.common.exceptions import NoSuchElementException
 
 import time
 import datetime
@@ -29,14 +26,12 @@ import logging
 
 # download chrome web driver zip file according to your chrome version and Operating System
 # https://sites.google.com/chromium.org/driver/
-# # extract the zip to a directory for later use
-PATH = "/lib/chromedriver"  # this the chrome driver file is
-driver = webdriver.Chrome(PATH)
+# extract the zip to a directory for later use
+s = Service("/lib/chromedriver")
+driver = webdriver.Chrome(service=s)
 driver.implicitly_wait(4)
 
-# need to register on the google maps platform and create a project to get the API Key, this makes crawling easier
-key = config('GoogleMapAPIKey')
-
+# search key words
 businesstype = "restaurants"
 location = "burnaby"
 
@@ -75,22 +70,18 @@ def main():
         body=spreadsheet, fields='spreadsheetId').execute()
 
     spreadsheetId = spreadsheet.get('spreadsheetId')
-    ###
 
     # enter column headings in the first row
-    headings = [
-        [
-            "name", "website", "stars", "review count", "category", "phone", "address", "3rd party ordering", "Timestamp"
-        ]
-    ]
-    body = {
-        'values': headings
-    }
-    spreadsheet = service.spreadsheets().values().append(spreadsheetId=spreadsheetId,
-                                                         range="A1",        valueInputOption="RAW", body=body).execute()
+    headings = [["name", "website", "stars", "review count", "category",
+                 "phone", "address", "3rd party ordering", "Timestamp"]]
 
+    spreadsheet = service.spreadsheets().values().append(spreadsheetId=spreadsheetId,
+                                                         range="A1",
+                                                         valueInputOption="RAW",
+                                                         body={'values': headings}).execute()
+
+    # needed for entering data to next row
     updatedRange = spreadsheet['updates']['updatedRange']
-    ###
 
     driver.get(
         f"https://www.google.com/search?q={businesstype}%20in%20{location}")
@@ -169,7 +160,7 @@ def main():
                 driver.find_element(  # enter data while there is next page
                     'xpath', "//span[contains(text(),'Next')]").click()
             except NoSuchElementException:
-                print('reached last page of results')
+                print('reached the last result on the last page')
                 driver.close()
                 sys. exit()
             time.sleep(4)
