@@ -15,6 +15,7 @@ from decouple import config
 # install selenium package
 # $ sudo pip3 install selenium
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 
 
@@ -27,8 +28,8 @@ import logging
 # download chrome web driver zip file according to your chrome version and Operating System
 # https://sites.google.com/chromium.org/driver/
 # extract the zip to a directory for later use
-PATH = "/lib/chromedriver"
-driver = webdriver.Chrome(PATH)
+s = Service("/lib/chromedriver")
+driver = webdriver.Chrome(service=s)
 driver.implicitly_wait(2)
 
 # instagram login
@@ -65,24 +66,31 @@ def main():
     service = build('sheets', 'v4', credentials=creds)
 
     # get the business names in an array for search
+    # instagram doesn't support searching with multiple creteria combined together
+    # best results is @ + business name
     businessNames = service.spreadsheets().values().get(
-        spreadsheetId=spreadsheetId, range="Burnaby!I2:I").execute()
+        spreadsheetId=spreadsheetId,
+        range="Burnaby!I2:I").execute()
+
     print(businessNames["values"])
 
-    # starting point in the google sheet
+    # input starting point in the google sheet
     rowNum = 2
     updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
 
     try:
-
+        # beginning of scripts to navigate instagram
         driver.get("https://www.instagram.com/")
         driver.find_element('name', 'username').send_keys(name)
         driver.find_element('name', 'password').send_keys(password)
         driver.find_element('xpath', "//*[contains(text(), 'Log In')]").click()
 
         for business in businessNames["values"]:
+
+            # construct the rows of data to enter into google sheet
             row = []
-            # add @ to filter down results
+
+            # @ symbol filter out hash tag and location results
             queryString = '@'+business[0]
             search = driver.find_element(
                 'xpath', "//input[contains(@*,'Search')]")
@@ -93,47 +101,31 @@ def main():
             results = search.find_element('xpath', "//*[@aria-hidden]")
 
             try:
-                results.find_element('xpath',
-                                     "//*[contains(text(), 'No results found.')]")  # this will raise exception if the results aren't empty
+
+                topResult = results.find_element(
+                    'xpath', "//div[2]/div/div/a")  # this will raise exception if the results are empty
+                pageURL = topResult.get_attribute("href")
+                print(f'search query "{queryString}": {pageURL}')
+                topResult.click()
+                try:
+                    driver.find_element(
+                        'xpath', "//button[contains(text(),'Follow')]").click()
+                    date = datetime.datetime.now().strftime(f"%Y-%m-%d")  # Timestamp
+                    row = [date, '', pageURL]
+                except NoSuchElementException:
+                    row = ['N/A', '', 'pageURL']
+
+            except NoSuchElementException:
                 print(f'search query "{queryString}": no results')
                 row = ["N/A", "", "N/A"]
 
-                service.spreadsheets().values().update(
-                    spreadsheetId=spreadsheetId, range=updatedRange,
-                    valueInputOption="RAW", body={
-                        'values': [row]
-                    }).execute()
-                rowNum += 1
-                updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
-
-            except NoSuchElementException:
-
-                topResult = results.find_element(
-                    'xpath', "div[2]/div/div/a").get_attribute("href")
-
-                # Check the first result's link string. If it has "explore" in its path, it's not a store page.
-                if("explore" not in topResult):
-                    print(f'search query "{queryString}": {topResult}')
-                    driver.get(topResult)
-                    try:
-                        driver.find_element(
-                            'xpath', "//button[contains(text(),'Follow')]").click()
-                        date = datetime.datetime.now().strftime(  # Timestamp
-                            f"%Y-%m-%d")
-                        row = [date, '', topResult]
-                    except NoSuchElementException:
-                        row = ['N/A', '', 'N/A']
-
-                else:
-                    print(f'search query "{queryString}": bad results')
-                    row = ["N/A", "", "N/A"]
-                service.spreadsheets().values().update(
-                    spreadsheetId=spreadsheetId, range=updatedRange,
-                    valueInputOption="RAW", body={
-                        'values': [row]
-                    }).execute()
-                rowNum += 1
-                updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
+            service.spreadsheets().values().update(
+                spreadsheetId=spreadsheetId,
+                range=updatedRange,
+                valueInputOption="RAW",
+                body={'values': [row]}).execute()
+            rowNum += 1
+            updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
 
         print('end of queries')
         driver.close()

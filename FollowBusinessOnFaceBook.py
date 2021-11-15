@@ -23,6 +23,7 @@ from selenium.webdriver.chrome.options import Options
 import numpy as np
 
 import datetime
+import time
 import sys
 import traceback
 import logging
@@ -114,7 +115,7 @@ def main():
                 row = [date, '', facebookpage]
             except NoSuchElementException:
                 row = ['N/A', '', 'N/A']
-
+            print(row)
             service.spreadsheets().values().update(
                 spreadsheetId=spreadsheetId, range=updatedRange,
                 valueInputOption="RAW", body={
@@ -122,6 +123,7 @@ def main():
                 }).execute()
             rowNum += 1
             updatedRange = f"Burnaby!F{rowNum}:H{rowNum}"
+            time.sleep(10)  # bypass the facebook limit
         sys.exit()
     except Exception:
         logging.error(traceback.format_exc())
