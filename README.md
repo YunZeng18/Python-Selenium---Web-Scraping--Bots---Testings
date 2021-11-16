@@ -50,11 +50,14 @@ I also discover that you can test your xpath in the chrome dev element tag by us
 
 ## FollowBusinessOnInstaGram.py
 
-I struggle a lot with how to filter down the search result to the store page because the search engine isn't that good on instagram. I discover you can add @ symbol to effectively filter out location and hashtag results. However, I realize there isn't a reliable way to determine if the store page is the one you want because instagram doesn't support sophisticated search filters. So I default to look at the first one on the result list and it usually returns a good match most of the time.
+I struggle a lot with how to filter down the search result to the store page because the search engine isn't that good on instagram. I discovered you can add @ symbol to effectively filter out location and hashtag results. However, I realize there isn't a reliable way to determine if the store page is the one you want because instagram doesn't support sophisticated search filters. So I default to look at the first one on the result list and it usually returns a good match most of the time.
 
 ## FollowBusinessOnFaceBook.py
 
-The search engine on facebook supports filter by address so it was always the top result if it matches. However, facebook detects your repetitive follow activity stops you from following too many businesses in a row with a popup.
+The search engine on facebook supports filter by address so it was always the top result if it matches. However, facebook detects your repetitive follow activity and stops you from following too many pages in a row with a popup.
+I tried to use script to click through the pop up that stops you from liking pages. But after 30 or so requests it just log you out and send you to login screen after 50 or so entries. None of the pages previously liked was actually liked when the pop up was in effect anyways. Now the new account is actually disabled within 30 days if i don't do something about it.
+
+## sendMessageOnInstagram.py
 
 ## Valuables
 
