@@ -108,14 +108,13 @@ def main():
                 message = message.replace("{Burnaby-based}", "Vancouver-based")
             else:
                 message = message.replace("{Burnaby-based}", "Burnaby-based")
-            print(message)
             for line in message.split('\n'):
-                driver.find_element('xpath', "//textarea[@placeholder]"
-                                    ).send_keys(line)
+                driver.find_element(
+                    'xpath', "//textarea[@placeholder]").send_keys(line)
                 ActionChains(driver).key_down(Keys.SHIFT).key_down(
                     Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.ENTER).perform()
-            while True:
-                pass
+            driver.find_element(
+                'xpath', "//textarea[@placeholder]").send_keys(Keys.ENTER)
 
     driver.close()
 

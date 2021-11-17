@@ -59,6 +59,8 @@ I tried to use script to click through the pop up that stops you from liking pag
 
 ## sendMessageOnInstagram.py
 
+replace \n in instagram text area element so it doesn't send message every new line.
+
 ## Valuables
 
 -Add @ prefix on instagram search to filter results down to instagram user accounts so it excludes location and hashtag results.
