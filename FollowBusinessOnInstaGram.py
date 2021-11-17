@@ -18,7 +18,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchElementException
 
-
+import time
 import datetime
 import sys
 import traceback
@@ -72,8 +72,6 @@ def main():
         spreadsheetId=spreadsheetId,
         range="Burnaby!I2:I").execute()
 
-    print(businessNames["values"])
-
     # input starting point in the google sheet
     rowNum = 2
     updatedRange = f"Burnaby!C{rowNum}:E{rowNum}"
@@ -86,6 +84,8 @@ def main():
         driver.find_element('xpath', "//*[contains(text(), 'Log In')]").click()
 
         for business in businessNames["values"]:
+
+            print(business)
 
             # construct the rows of data to enter into google sheet
             row = []
@@ -101,16 +101,17 @@ def main():
             results = search.find_element('xpath', "//*[@aria-hidden]")
 
             try:
+                time.sleep(1)
 
                 topResult = results.find_element(
-                    'xpath', "//div[2]/div/div/a")  # this will raise exception if the results are empty
+                    'xpath', "div[2]/div/div/a")  # this will raise exception if the results are empty
                 pageURL = topResult.get_attribute("href")
                 print(f'search query "{queryString}": {pageURL}')
-                topResult.click()
+                driver.get(pageURL)
                 try:
                     driver.find_element(
                         'xpath', "//button[contains(text(),'Follow')]").click()
-                    date = datetime.datetime.now().strftime(f"%Y-%m-%d")  # Timestamp
+                    date = datetime.datetime.now().strftime(f"%Y-%m-%d")
                     row = [date, '', pageURL]
                 except NoSuchElementException:
                     row = ['N/A', '', pageURL]
