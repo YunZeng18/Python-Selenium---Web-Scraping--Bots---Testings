@@ -68,6 +68,7 @@ def main():
     service = build('sheets', 'v4', credentials=creds)
 
     # get the data into 4 different array and combine into one 2D array
+
     storeUrl = np.array(service.spreadsheets().values().get(
         spreadsheetId=spreadsheetId,
         range="Burnaby!E2:E").execute()['values'])
@@ -81,7 +82,7 @@ def main():
         spreadsheetId=spreadsheetId,
         range="Burnaby!W2:W").execute()['values'])
 
-    # thiscombine the arrays into a 2D array, each row has an array with 4 elements
+    # thiscombine the arrays into a 2D array, each row has an array with 5 elements
     storesInfo = np.column_stack(
         (storeUrl, storeName, storeProvince, messageType))
     print(storesInfo)
@@ -95,8 +96,12 @@ def main():
     driver.find_element('xpath', "//button[contains(text(), 'Not Now')]"
                         ).click()
 
-    for details in storesInfo:
-        if(details[0] != 'N/A'):
+    for index, details in enumerate(storesInfo):
+        messageTime = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheetId,
+            range=f"Burnaby!D{index+2}").execute()
+
+        if(details[0] != 'N/A' and 'values' not in messageTime):
             driver.get(details[0])
             driver.find_element(
                 'xpath', "//div[contains(text(), 'Message')]").click()
@@ -115,6 +120,13 @@ def main():
                     Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.ENTER).perform()
             driver.find_element(
                 'xpath', "//textarea[@placeholder]").send_keys(Keys.ENTER)
+            timestamp = datetime.datetime.now().strftime(f"%Y-%m-%d %H:%M:%S")
+
+            service.spreadsheets().values().update(
+                spreadsheetId=spreadsheetId,
+                range=f"Burnaby!D{index+2}",
+                valueInputOption="RAW",
+                body={'values': [[timestamp]]}).execute()
 
     driver.close()
 
