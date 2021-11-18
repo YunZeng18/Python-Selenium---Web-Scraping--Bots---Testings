@@ -60,6 +60,11 @@ I tried to use script to click through the pop up that stops you from liking pag
 ## sendMessageOnInstagram.py
 
 replace \n in instagram text area element so it doesn't send message every new line.
+repeated log in in short time span causes account being blocked from login
+
+## sendMessageOnFacebook
+
+initial load of message box takes a long time to load.
 
 ## Valuables
 
