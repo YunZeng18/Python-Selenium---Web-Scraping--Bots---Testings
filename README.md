@@ -15,21 +15,22 @@ $ sudo pip3 install python-decouple
 for pairing two arrays into one
 $ sudo pip3 install numpy
 
-download chrome web driver zip file according to your chrome version and system
-https://sites.google.com/chromium.org/driver/
-extract the zip to a directory for later use
+for webdriver
+$ sudo pip3 install webdriver-manager
 
 create .env file and define the value for the following
+pathToWebDriver=
+folderId=
 InstagramUsername=
 InstagramPass=
 FacebookUsername=
 FacebookPass=
-spreadsheetId=
 
-create a project on google cloud console and download credential files. rename it to credential.json and save in the same directory.
+create a project on google cloud console and download credential files. rename it to credentials.json and save in the same directory.
+enable google drive API
 
-craw data into google sheet run
-$ python3 crawler2.py
+craw data into google sheet. This creates a new spreadsheet file every time a new province is crawled and a new sub sheet for a new city.
+$ python3 GoogleSearchCrawlerCanada.py
 
 follow businesses on instagram
 $ python3 FollowBusinessOnInstaGram.py
@@ -39,14 +40,19 @@ $ python3 FollowBusinessOnFaceBook.py
 
 # Notes
 
-## crawler.py
+## GoogleMapAPIcrawler.py
 
 first attempt to get results from google map. I thought it would be easier but google ends up limiting you from getting more than 60 results on the same query. So for the same query like "restaurants in burnaby" you will only get 3 calls to the https://maps.googleapis.com/maps/api/place/textsearch/json?query={businesstype}%20{location}&key={key}&pagetoken={nextPageToken} and there would be no more nextPageToken after 3 calls that return 20 results each.
 
-## crawler2.py
+## GoogleSearchCrawlerByCity.py
 
 This script directly navigates through the google.com and crawl the results of restaurants in burnaby. You can change the query to by changing the variables businesstype and location. Google scramble all the tag names and ID so it was hard initially to get the elements until I discover the proper use of xpath in selenium package.
 I also discover that you can test your xpath in the chrome dev element tag by using ctl + F. This saves a lot of time.
+
+## GoogleSearchCrawlerCanada.py
+
+use a list of cities found on https://simplemaps.com/data/canada-cities to crawl all the cities in canada
+This creates a new spreadsheet file every time a new province is crawled and a new sub sheet for a new city.
 
 ## FollowBusinessOnInstaGram.py
 
